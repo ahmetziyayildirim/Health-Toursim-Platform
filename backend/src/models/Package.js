@@ -262,12 +262,21 @@ packageSchema.virtual('isAvailable').get(function() {
 
 // Virtual for discounted price
 packageSchema.virtual('discountedPrice').get(function() {
+  // Safety checks to prevent undefined errors
+  if (!this.pricing || !this.pricing.basePrice) {
+    return 0;
+  }
+  
+  if (!this.pricing.discounts || !Array.isArray(this.pricing.discounts)) {
+    return this.pricing.basePrice;
+  }
+  
   const now = new Date();
   const activeDiscount = this.pricing.discounts.find(discount => 
-    !discount.validUntil || discount.validUntil >= now
+    discount && (!discount.validUntil || discount.validUntil >= now)
   );
   
-  if (activeDiscount) {
+  if (activeDiscount && activeDiscount.percentage) {
     return this.pricing.basePrice * (1 - activeDiscount.percentage / 100);
   }
   

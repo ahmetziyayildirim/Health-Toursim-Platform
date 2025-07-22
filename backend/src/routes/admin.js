@@ -197,10 +197,6 @@ router.delete('/users/:id', async (req, res) => {
 // @route   GET /api/admin/bookings
 // @access  Private/Admin
 router.get('/bookings', async (req, res) => {
-  console.log('=== ADMIN BOOKINGS DEBUG START ===');
-  console.log('Request query:', req.query);
-  console.log('User:', req.user ? { id: req.user._id, role: req.user.role, email: req.user.email } : 'No user');
-  
   try {
     const {
       page = 1,
@@ -210,58 +206,36 @@ router.get('/bookings', async (req, res) => {
       sort = '-createdAt'
     } = req.query;
 
-    console.log('Parsed query params:', { page, limit, status, search, sort });
-
-    // Database connection check
-    const mongoose = require('mongoose');
-    console.log('MongoDB connection state:', mongoose.connection.readyState);
-    console.log('MongoDB connection name:', mongoose.connection.name);
-    
-    // Check if models exist
-    console.log('Booking model exists:', !!Booking);
-    console.log('User model exists:', !!User);
-    console.log('Package model exists:', !!Package);
-
     // Build query
     let query = {};
     
     if (status) {
-      console.log('Adding status filter:', status);
       query.status = status;
     }
 
-    console.log('Starting search logic...');
     if (search) {
       try {
-        console.log('Searching for:', search);
-        
         // Search in user names or package titles
-        console.log('Searching users...');
         const users = await User.find({
           $or: [
             { firstName: { $regex: search, $options: 'i' } },
             { lastName: { $regex: search, $options: 'i' } }
           ]
         }).select('_id');
-        console.log('Found users:', users.length);
 
-        console.log('Searching packages...');
         const packages = await Package.find({
           title: { $regex: search, $options: 'i' }
         }).select('_id');
-        console.log('Found packages:', packages.length);
 
         if (users.length > 0 || packages.length > 0) {
           const orConditions = [];
           
           if (users.length > 0) {
             orConditions.push({ user: { $in: users.map(u => u._id) } });
-            console.log('Added user IDs to query:', users.map(u => u._id));
           }
           
           if (packages.length > 0) {
             orConditions.push({ package: { $in: packages.map(p => p._id) } });
-            console.log('Added package IDs to query:', packages.map(p => p._id));
           }
           
           if (orConditions.length > 0) {
@@ -269,19 +243,14 @@ router.get('/bookings', async (req, res) => {
           }
         } else {
           // If no users or packages match the search, return empty results
-          console.log('No matching users or packages found, returning empty results');
           query._id = { $in: [] };
         }
       } catch (searchError) {
         console.error('Search error in admin bookings:', searchError);
-        console.error('Search error stack:', searchError.stack);
         // Continue without search if there's an error
       }
     }
 
-    console.log('Final query object:', JSON.stringify(query, null, 2));
-    
-    console.log('Executing bookings query...');
     const bookings = await Booking.find(query)
       .sort(sort)
       .limit(limit * 1)
@@ -297,13 +266,9 @@ router.get('/bookings', async (req, res) => {
         options: { strictPopulate: false }
       });
 
-    console.log('Bookings query successful, found:', bookings.length, 'bookings');
-    
-    console.log('Executing count query...');
     const total = await Booking.countDocuments(query);
-    console.log('Total count:', total);
 
-    const response = {
+    res.status(200).json({
       success: true,
       count: bookings.length,
       total,
@@ -313,27 +278,12 @@ router.get('/bookings', async (req, res) => {
         pages: Math.ceil(total / limit)
       },
       data: bookings
-    };
-
-    console.log('Sending successful response');
-    console.log('=== ADMIN BOOKINGS DEBUG END ===');
-    
-    res.status(200).json(response);
+    });
   } catch (error) {
-    console.error('=== ADMIN BOOKINGS ERROR ===');
-    console.error('Error type:', error.constructor.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Error details:', error);
-    console.error('=== ADMIN BOOKINGS ERROR END ===');
-    
+    console.error('Error fetching bookings:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching bookings',
-      ...(process.env.NODE_ENV === 'development' && { 
-        error: error.message,
-        stack: error.stack 
-      })
+      message: 'Server error while fetching bookings'
     });
   }
 });
