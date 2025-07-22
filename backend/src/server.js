@@ -14,21 +14,38 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// CORS configuration for both development and production
+const allowedOrigins = [
+  // Development origins
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://localhost:3003',
+  'http://localhost:3004',
+  'http://localhost:3005',
+  'http://localhost:3006',
+  'http://localhost:5001',
+  'http://localhost:5002',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  // Production origins (will be set via environment variables)
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3003',
-    'http://localhost:3004',
-    'http://localhost:3005',
-    'http://localhost:3006',  // Add missing frontend port
-    'http://localhost:5001',  // Backend port
-    'http://localhost:5002',  // Backend alternate port
-    'http://localhost:5173',  // Vite default port
-    'http://localhost:5174',  // Vite alternate port
-    'http://localhost:5175'   // Vite alternate port
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

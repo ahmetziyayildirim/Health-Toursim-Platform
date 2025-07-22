@@ -5,24 +5,36 @@ let mongod;
 
 const connectDB = async () => {
   try {
-    // For development, use MongoDB Memory Server if no local MongoDB
-    if (process.env.NODE_ENV === 'development' && process.env.MONGODB_URI === 'memory') {
-      console.log('🚀 Starting MongoDB Memory Server...');
+    let mongoUri = process.env.MONGODB_URI;
+
+    // For development, use MongoDB Memory Server if no MongoDB URI provided
+    if (process.env.NODE_ENV === 'development' && (!mongoUri || mongoUri === 'memory')) {
+      console.log('🚀 Starting MongoDB Memory Server for development...');
       mongod = await MongoMemoryServer.create();
-      const uri = mongod.getUri();
-      process.env.MONGODB_URI = uri;
+      mongoUri = mongod.getUri();
       console.log('✅ MongoDB Memory Server started');
     }
 
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    // Validate MongoDB URI
+    if (!mongoUri) {
+      throw new Error('MONGODB_URI environment variable is required');
+    }
+
+    const conn = await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      serverSelectionTimeoutMS: process.env.NODE_ENV === 'production' ? 10000 : 5000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      bufferMaxEntries: 0, // Disable mongoose buffering
+      bufferCommands: false, // Disable mongoose buffering
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📊 Database: ${conn.connection.name}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {
@@ -31,6 +43,10 @@ const connectDB = async () => {
 
     mongoose.connection.on('disconnected', () => {
       console.log('⚠️ MongoDB disconnected');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('🔄 MongoDB reconnected');
     });
 
     // Graceful shutdown
@@ -46,17 +62,29 @@ const connectDB = async () => {
       process.exit(0);
     });
 
+    process.on('SIGTERM', async () => {
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.close();
+        console.log('🔌 MongoDB connection closed through SIGTERM');
+      }
+      if (mongod) {
+        await mongod.stop();
+        console.log('🔌 MongoDB Memory Server stopped');
+      }
+      process.exit(0);
+    });
+
   } catch (error) {
     console.error('❌ Database connection error:', error.message);
-    console.log('⚠️ Continuing without database connection...');
     
-    // In development, continue without database
+    // In development, continue without database for testing
     if (process.env.NODE_ENV === 'development') {
       console.log('🔧 Development mode: Server will run without database');
       return;
     }
     
     // In production, exit on database error
+    console.error('💥 Production database connection failed. Exiting...');
     process.exit(1);
   }
 };

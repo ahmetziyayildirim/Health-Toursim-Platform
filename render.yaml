@@ -1,0 +1,42 @@
+services:
+  # Backend API Service
+  - type: web
+    name: health-tourism-backend
+    runtime: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
+      - key: MONGODB_URI
+        sync: false # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: health-tourism-frontend
+          property: url
+    healthCheckPath: /health
+
+  # Frontend Service
+  - type: web
+    name: health-tourism-frontend
+    runtime: static
+    plan: free
+    buildCommand: npm install && npm run build
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: health-tourism-backend
+          property: url
+      - key: VITE_NODE_ENV
+        value: production
+
+databases: []
