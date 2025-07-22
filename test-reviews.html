@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review System Test - Health Tourism Platform</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useContext, createContext } = React;
+
+    // Auth Context
+    const AuthContext = createContext();
+
+    const AuthProvider = ({ children }) => {
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(false);
+
+      // Simulated login for testing
+      const login = (credentials) => {
+        setLoading(true);
+        setTimeout(() => {
+          setUser({
+            _id: '677235c5c9c8f3b6ba123456',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: credentials.email,
+            role: 'customer'
+          });
+          setLoading(false);
+        }, 1000);
+      };
+
+      const logout = () => {
+        setUser(null);
+      };
+
+      return (
+        <AuthContext.Provider value={{ user, login, logout, loading }}>
+          {children}
+        </AuthContext.Provider>
+      );
+    };
+
+    const useAuth = () => {
+      const context = useContext(AuthContext);
+      if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+      }
+      return context;
+    };
+
+    // API Service
+    const api = {
+      get: async (url) => {
+        const response = await axios.get(`http://localhost:5001/api${url}`);
+        return response;
+      },
+      post: async (url, data) => {
+        const response = await axios.post(`http://localhost:5001/api${url}`, data);
+        return response;
+      },
+      put: async (url, data) => {
+        const response = await axios.put(`http://localhost:5001/api${url}`, data);
+        return response;
+      },
+      delete: async (url) => {
+        const response = await axios.delete(`http://localhost:5001/api${url}`);
+        return response;
+      }
+    };
+
+    // Review Service
+    const reviewService = {
+      getPackageReviews: async (packageId, params = {}) => {
+        try {
+          const { sort = '-createdAt', rating, limit = 10, page = 1 } = params;
+          const queryParams = new URLSearchParams({
+            sort,
+            limit,
+            page,
+            ...(rating && { rating })
+          });
+          
+          const response = await api.get(`/packages/${packageId}/reviews?${queryParams}`);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching package reviews:', error);
+          throw error;
+        }
+      },
+
+      createReview: async (packageId, reviewData) => {
+        try {
+          const response = await api.post(`/packages/${packageId}/reviews`, reviewData);
+          return response.data;
+        } catch (error) {
+          console.error('Error creating review:', error);
+          throw error;
+        }
+      },
+
+      updateReview: async (reviewId, reviewData) => {
+        try {
+          const response = await api.put(`/reviews/${reviewId}`, reviewData);
+          return response.data;
+        } catch (error) {
+          console.error('Error updating review:', error);
+          throw error;
+        }
+      },
+
+      deleteReview: async (reviewId) => {
+        try {
+          const response = await api.delete(`/reviews/${reviewId}`);
+          return response.data;
+        } catch (error) {
+          console.error('Error deleting review:', error);
+          throw error;
+        }
+      },
+
+      voteHelpful: async (reviewId) => {
+        try {
+          const response = await api.post(`/reviews/${reviewId}/helpful`);
+          return response.data;
+        } catch (error) {
+          console.error('Error voting review:', error);
+          throw error;
+        }
+      }
+    };
+
+    // Star Rating Component
+    const StarRating = ({ 
+      rating = 0, 
+      maxRating = 5, 
+      size = 'md', 
+      interactive = false, 
+      onRatingChange,
+      showNumber = false 
+    }) => {
+      const sizes = {
+        sm: 'w-4 h-4',
+        md: 'w-5 h-5',
+        lg: 'w-6 h-6',
+        xl: 'w-8 h-8'
+      };
+
+      const handleStarClick = (starIndex) => {
+        if (interactive && onRatingChange) {
+          onRatingChange(starIndex + 1);
+        }
+      };
+
+      return (
+        <div className="flex items-center gap-1">
+          <div className="flex">
+            {[...Array(maxRating)].map((_, index) => {
+              const isFilled = index < Math.floor(rating);
+              const isHalfFilled = index === Math.floor(rating) && rating % 1 !== 0;
+              
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  className={`relative ${sizes[size]} ${
+                    interactive 
+                      ? 'cursor-pointer hover:scale-110 transition-transform' 
+                      : 'cursor-default'
+                  }`}
+                  onClick={() => handleStarClick(index)}
+                  disabled={!interactive}
+                >
+                  <svg
+                    className="absolute inset-0 text-gray-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+
+                  {(isFilled || isHalfFilled) && (
+                    <svg
+                      className={`absolute inset-0 text-yellow-400 ${
+                        isHalfFilled ? 'w-1/2 overflow-hidden' : ''
+                      }`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          
+          {showNumber && (
+            <span className="text-sm text-gray-600 ml-1">
+              ({rating.toFixed(1)})
+            </span>
+          )}
+        </div>
+      );
+    };
+
+    // Login Form
+    const LoginForm = ({ onClose }) => {
+      const { login } = useAuth();
+      const [credentials, setCredentials] = useState({
+        email: 'admin@healthjourney.com',
+        password: 'admin123'
+      });
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        login(credentials);
+        onClose();
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Login for Testing</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={credentials.email}
+                  onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={credentials.password}
+                  onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    // Main Test App
+    const ReviewTestApp = () => {
+      const { user, logout } = useAuth();
+      const [showLogin, setShowLogin] = useState(false);
+      const [packages, setPackages] = useState([]);
+      const [selectedPackage, setSelectedPackage] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        fetchPackages();
+      }, []);
+
+      const fetchPackages = async () => {
+        try {
+          const response = await api.get('/packages');
+          setPackages(response.data.data);
+          if (response.data.data.length > 0) {
+            setSelectedPackage(response.data.data[0]);
+          }
+        } catch (error) {
+          console.error('Error fetching packages:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      if (loading) {
+        return (
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading packages...</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-gray-50">
+          {/* Header */}
+          <div className="bg-white shadow-sm border-b">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Review System Test
+                  </h1>
+                  <p className="text-gray-600 mt-1">
+                    Testing the complete review functionality
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  {user ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">
+                        Welcome, {user.firstName}!
+                      </span>
+                      <button
+                        onClick={logout}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowLogin(true)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      Login to Test Reviews
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {selectedPackage ? (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Package Selection */}
+                <div className="lg:col-span-1">
+                  <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-8">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                      Select Package
+                    </h2>
+                    <div className="space-y-3">
+                      {packages.map((pkg) => (
+                        <button
+                          key={pkg._id}
+                          onClick={() => setSelectedPackage(pkg)}
+                          className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                            selectedPackage._id === pkg._id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900 mb-1">
+                            {pkg.title}
+                          </div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <StarRating 
+                              rating={pkg.rating?.average || 0} 
+                              size="sm" 
+                              showNumber={true}
+                            />
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {pkg.rating?.count || 0} review{pkg.rating?.count !== 1 ? 's' : ''}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Package & Reviews */}
+                <div className="lg:col-span-2">
+                  <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      {selectedPackage.title}
+                    </h2>
+                    <p className="text-gray-600 mb-3">
+                      {selectedPackage.description}
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <StarRating 
+                        rating={selectedPackage.rating?.average || 0} 
+                        size="md" 
+                        showNumber={true}
+                      />
+                      <span className="text-lg font-bold text-blue-600">
+                        €{selectedPackage.pricing?.basePrice}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold mb-4">Reviews</h3>
+                    <p className="text-gray-600">
+                      Review components will be loaded here once authenticated users test the functionality.
+                      {user ? ' You are logged in and can test all features!' : ' Please login to test review creation.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-gray-600">No packages found</p>
+              </div>
+            )}
+          </div>
+
+          {showLogin && <LoginForm onClose={() => setShowLogin(false)} />}
+        </div>
+      );
+    };
+
+    // App Root
+    const App = () => {
+      return (
+        <AuthProvider>
+          <ReviewTestApp />
+        </AuthProvider>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+        .admin-panel {
+            display: none;
+        }
+        .nav-buttons {
+            margin-bottom: 20px;
+        }
+        .nav-buttons button {
+            width: auto;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .data-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .user-item, .package-item, .booking-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HealthJourney Admin Panel Test</h1>
+        
+        <!-- Login Form -->
+        <div id="loginForm" class="login-form">
+            <h2>Admin Login</h2>
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" value="admin@healthjourney.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" value="admin123" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div id="loginMessage"></div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel">
+            <div class="nav-buttons">
+                <button onclick="loadDashboard()">Dashboard</button>
+                <button onclick="loadUsers()">Users</button>
+                <button onclick="loadPackages()">Packages</button>
+                <button onclick="loadBookings()">Bookings</button>
+                <button onclick="logout()">Logout</button>
+            </div>
+            
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+
+        // Login functionality
+        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('loginMessage');
+            
+            try {
+                const response = await fetch('http://localhost:5001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.data.user.role === 'admin') {
+                    authToken = data.data.token;
+                    messageDiv.innerHTML = '<div class="success">Login successful!</div>';
+                    
+                    // Hide login form and show admin panel
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'block';
+                    
+                    // Load dashboard by default
+                    loadDashboard();
+                } else {
+                    messageDiv.innerHTML = '<div class="error">Invalid credentials or insufficient permissions</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="error">Login failed: ' + error.message + '</div>';
+            }
+        });
+
+        // API helper function
+        async function apiCall(endpoint) {
+            const response = await fetch(`http://localhost:5001/api${endpoint}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            return response.json();
+        }
+
+        // Dashboard
+        async function loadDashboard() {
+            try {
+                const data = await apiCall('/admin/dashboard');
+                
+                if (data.success) {
+                    const stats = data.data.stats;
+                    const recentUsers = data.data.recentUsers;
+                    const recentBookings = data.data.recentBookings;
+                    
+                    document.getElementById('content').innerHTML = `
+                        <h2>Dashboard</h2>
+                        <div class="stats">
+                            <div class="stat-card">
+                                <div class="stat-number">${stats.totalUsers}</div>
+                                <div>Total Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${stats.totalPackages}</div>
+                                <div>Total Packages</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${stats.totalBookings}</div>
+                                <div>Total Bookings</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${stats.activePackages}</div>
+                                <div>Active Packages</div>
+                            </div>
+                        </div>
+                        
+                        <h3>Recent Users</h3>
+                        <div class="data-section">
+                            ${recentUsers.map(user => `
+                                <div class="user-item">
+                                    <strong>${user.firstName} ${user.lastName}</strong><br>
+                                    Email: ${user.email}<br>
+                                    Joined: ${new Date(user.createdAt).toLocaleDateString()}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <h3>Recent Bookings</h3>
+                        <div class="data-section">
+                            ${recentBookings.map(booking => `
+                                <div class="booking-item">
+                                    <strong>Booking #${booking.bookingNumber || 'N/A'}</strong><br>
+                                    Package: ${booking.package?.title || 'N/A'}<br>
+                                    Customer: ${booking.user?.firstName || booking.personalInfo?.firstName || 'N/A'} ${booking.user?.lastName || booking.personalInfo?.lastName || ''}<br>
+                                    Status: ${booking.status}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="error">Error loading dashboard: ${error.message}</div>`;
+            }
+        }
+
+        // Users
+        async function loadUsers() {
+            try {
+                const data = await apiCall('/admin/users');
+                
+                if (data.success) {
+                    document.getElementById('content').innerHTML = `
+                        <h2>Users Management (${data.total} users)</h2>
+                        <div class="data-section">
+                            ${data.data.map(user => `
+                                <div class="user-item">
+                                    <strong>${user.firstName} ${user.lastName}</strong><br>
+                                    Email: ${user.email}<br>
+                                    Country: ${user.country || 'N/A'}<br>
+                                    Status: ${user.isActive ? 'Active' : 'Inactive'}<br>
+                                    Role: ${user.role}<br>
+                                    Joined: ${new Date(user.createdAt).toLocaleDateString()}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="error">Error loading users: ${error.message}</div>`;
+            }
+        }
+
+        // Packages
+        async function loadPackages() {
+            try {
+                const response = await fetch('http://localhost:5001/api/packages');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('content').innerHTML = `
+                        <h2>Packages Management (${data.data.length} packages)</h2>
+                        <div class="data-section">
+                            ${data.data.map(pkg => `
+                                <div class="package-item">
+                                    <strong>${pkg.title}</strong><br>
+                                    Location: ${pkg.location?.city}, ${pkg.location?.country}<br>
+                                    Price: €${pkg.pricing?.basePrice}<br>
+                                    Duration: ${pkg.duration?.days} days<br>
+                                    Category: ${pkg.category}<br>
+                                    Status: ${pkg.isActive ? 'Active' : 'Inactive'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="error">Error loading packages: ${error.message}</div>`;
+            }
+        }
+
+        // Bookings
+        async function loadBookings() {
+            try {
+                const data = await apiCall('/admin/bookings');
+                
+                if (data.success) {
+                    document.getElementById('content').innerHTML = `
+                        <h2>Bookings Management (${data.total} bookings)</h2>
+                        <div class="data-section">
+                            ${data.data.map(booking => `
+                                <div class="booking-item">
+                                    <strong>Booking #${booking.bookingNumber}</strong><br>
+                                    Package: ${booking.package?.title}<br>
+                                    Customer: ${booking.user?.firstName || booking.personalInfo?.firstName} ${booking.user?.lastName || booking.personalInfo?.lastName}<br>
+                                    Email: ${booking.user?.email || booking.personalInfo?.email}<br>
+                                    Total Price: €${booking.pricing?.totalPrice}<br>
+                                    Status: ${booking.status}<br>
+                                    Created: ${new Date(booking.createdAt).toLocaleDateString()}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="error">Error loading bookings: ${error.message}</div>`;
+            }
+        }
+
+        // Logout
+        function logout() {
+            authToken = null;
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('email').value = 'admin@healthjourney.com';
+            document.getElementById('password').value = 'admin123';
+            document.getElementById('loginMessage').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
