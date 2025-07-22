@@ -214,30 +214,57 @@ router.get('/bookings', async (req, res) => {
     }
 
     if (search) {
-      // Search in user names or package titles
-      const users = await User.find({
-        $or: [
-          { firstName: { $regex: search, $options: 'i' } },
-          { lastName: { $regex: search, $options: 'i' } }
-        ]
-      }).select('_id');
+      try {
+        // Search in user names or package titles
+        const users = await User.find({
+          $or: [
+            { firstName: { $regex: search, $options: 'i' } },
+            { lastName: { $regex: search, $options: 'i' } }
+          ]
+        }).select('_id');
 
-      const packages = await Package.find({
-        title: { $regex: search, $options: 'i' }
-      }).select('_id');
+        const packages = await Package.find({
+          title: { $regex: search, $options: 'i' }
+        }).select('_id');
 
-      query.$or = [
-        { user: { $in: users.map(u => u._id) } },
-        { package: { $in: packages.map(p => p._id) } }
-      ];
+        if (users.length > 0 || packages.length > 0) {
+          const orConditions = [];
+          
+          if (users.length > 0) {
+            orConditions.push({ user: { $in: users.map(u => u._id) } });
+          }
+          
+          if (packages.length > 0) {
+            orConditions.push({ package: { $in: packages.map(p => p._id) } });
+          }
+          
+          if (orConditions.length > 0) {
+            query.$or = orConditions;
+          }
+        } else {
+          // If no users or packages match the search, return empty results
+          query._id = { $in: [] };
+        }
+      } catch (searchError) {
+        console.error('Search error in admin bookings:', searchError);
+        // Continue without search if there's an error
+      }
     }
 
     const bookings = await Booking.find(query)
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .populate('user', 'firstName lastName email')
-      .populate('package', 'title location.city location.country pricing.basePrice');
+      .populate({
+        path: 'user',
+        select: 'firstName lastName email',
+        options: { strictPopulate: false }
+      })
+      .populate({
+        path: 'package',
+        select: 'title location.city location.country pricing.basePrice',
+        options: { strictPopulate: false }
+      });
 
     const total = await Booking.countDocuments(query);
 
@@ -268,7 +295,13 @@ router.put('/bookings/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
 
-    if (!['pending', 'confirmed', 'cancelled', 'completed'].includes(status)) {
+    const validStatuses = [
+      'pending-confirmation', 'confirmed', 'payment-pending', 'payment-completed',
+      'documents-required', 'documents-received', 'pre-travel-consultation',
+      'travel-ready', 'in-progress', 'completed', 'cancelled', 'refunded'
+    ];
+    
+    if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid status'
