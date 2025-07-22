@@ -103,9 +103,8 @@ const AdminPanel = () => {
   const loadPackages = React.useCallback(async () => {
     try {
       console.log('Loading packages via admin endpoint...');
-      const response = await fetch('http://localhost:5001/api/packages/admin/all');
-      console.log('Admin packages response status:', response.status);
-      const data = await response.json();
+      const adminService = (await import('../services/adminService')).default;
+      const data = await adminService.getPackages();
       console.log('Admin packages response data:', data);
       if (data.success) {
         console.log('Setting admin packages:', data.data);
@@ -118,12 +117,11 @@ const AdminPanel = () => {
     }
   }, []);
 
-      const loadBookings = React.useCallback(async () => {
+  const loadBookings = React.useCallback(async () => {
     try {
       console.log('Loading bookings...');
-      const response = await fetch('http://localhost:5001/api/bookings');
-      console.log('Bookings response status:', response.status);
-      const data = await response.json();
+      const adminService = (await import('../services/adminService')).default;
+      const data = await adminService.getBookings();
       console.log('Bookings response data:', data);
       if (data.success) {
         console.log('Setting bookings:', data.data);
@@ -150,16 +148,6 @@ const AdminPanel = () => {
       }
     } catch (error) {
       console.error('Failed to load users via admin API:', error);
-      // Fallback to regular API for demo
-      try {
-        const response = await fetch('http://localhost:3000/api/users');
-        const data = await response.json();
-        if (data.success) {
-          setUsers(data.data);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback API also failed:', fallbackError);
-      }
     }
   }, []);
 
@@ -189,17 +177,13 @@ const AdminPanel = () => {
     try {
       console.log('Loading dashboard data...');
       
-      // Load all data in parallel - use admin endpoint for packages to get all packages including inactive ones
-      const [usersRes, packagesRes, bookingsRes] = await Promise.all([
-        fetch('http://localhost:5001/api/users'),
-        fetch('http://localhost:5001/api/packages/admin/all'), // Admin endpoint to get all packages
-        fetch('http://localhost:5001/api/bookings')
-      ]);
-
+      const adminService = (await import('../services/adminService')).default;
+      
+      // Load all data in parallel
       const [usersData, packagesData, bookingsData] = await Promise.all([
-        usersRes.json(),
-        packagesRes.json(),
-        bookingsRes.json()
+        adminService.getUsers(),
+        adminService.getPackages(),
+        adminService.getBookings()
       ]);
 
       console.log('Dashboard data loaded:', { usersData, packagesData, bookingsData });
@@ -278,16 +262,11 @@ const AdminPanel = () => {
 
       console.log('Formatted package data:', packageData);
 
-      const response = await fetch('http://localhost:5001/api/packages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(packageData)
-      });
-      
-      const result = await response.json();
+      const adminService = (await import('../services/adminService')).default;
+      const result = await adminService.createPackage(packageData);
       console.log('Add package response:', result);
       
-      if (response.ok) {
+      if (result.success) {
         setShowAddForm(false);
         setNewPackage({
           title: '',
@@ -353,16 +332,11 @@ const AdminPanel = () => {
 
       console.log('Formatted package data for update:', packageData);
 
-      const response = await fetch(`http://localhost:5001/api/packages/${editingPackage._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(packageData)
-      });
-      
-      const result = await response.json();
+      const adminService = (await import('../services/adminService')).default;
+      const result = await adminService.updatePackage(editingPackage._id, packageData);
       console.log('Update package response:', result);
       
-      if (response.ok) {
+      if (result.success) {
         setEditingPackage(null);
         loadPackages();
         alert('Package updated successfully!');
@@ -379,13 +353,14 @@ const AdminPanel = () => {
   const handleDeletePackage = async (packageId) => {
     if (window.confirm('Are you sure you want to delete this package?')) {
       try {
-        const response = await fetch(`http://localhost:5001/api/packages/${packageId}`, {
-          method: 'DELETE'
-        });
+        const adminService = (await import('../services/adminService')).default;
+        const result = await adminService.deletePackage(packageId);
         
-        if (response.ok) {
+        if (result.success) {
           loadPackages();
           alert('Package deleted successfully!');
+        } else {
+          alert('Failed to delete package: ' + (result.message || 'Unknown error'));
         }
       } catch (error) {
         console.error('Failed to delete package:', error);

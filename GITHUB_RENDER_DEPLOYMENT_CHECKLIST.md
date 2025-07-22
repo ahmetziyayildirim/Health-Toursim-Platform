@@ -36,7 +36,7 @@ Create these in Render dashboard for backend service:
 
 #### Database
 ```
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/health-tourism
+    =mongodb+srv://username:password@cluster.mongodb.net/health-tourism
 ```
 
 #### Authentication
