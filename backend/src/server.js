@@ -29,7 +29,9 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
-  // Production origins (will be set via environment variables)
+  // Production origins
+  'https://health-tourism-frontend.onrender.com',
+  'https://health-toursim-platform.onrender.com',
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL
 ].filter(Boolean); // Remove undefined values
