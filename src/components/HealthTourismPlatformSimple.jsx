@@ -6,6 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 import StarRating from './StarRating';
 import ReviewsList from './ReviewsList';
 import SearchFilters from './SearchFilters';
+import AIChat from './AIChat';
 
 const HealthTourismPlatformSimple = () => {
   const { user, login, logout, isAdmin } = useContext(AuthContext);
@@ -1444,6 +1445,27 @@ const HealthTourismPlatformSimple = () => {
     return renderPackageDetail();
   }
 
+  if (currentView === 'chat') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+        {renderHeader()}
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px', height: 'calc(100vh - 120px)' }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 10px 15px rgba(0,0,0,0.1)',
+            height: '100%',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <AIChat onClose={() => setCurrentView('home')} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)' }}>
@@ -1492,7 +1514,7 @@ const HealthTourismPlatformSimple = () => {
             Plan a Trip
           </button>
           <button
-            onClick={() => alert('Ask AI clicked!')}
+            onClick={() => setCurrentView('chat')}
             style={{
               backgroundColor: '#16a34a',
               color: 'white',

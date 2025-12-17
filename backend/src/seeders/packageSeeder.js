@@ -440,6 +440,152 @@ const samplePackages = [
     isActive: true,
     isFeatured: false,
     tags: ['lasik', 'eye-surgery', 'vision', 'quick']
+  },
+
+  // Additional WELLNESS & SPA PACKAGES
+  {
+    title: 'Bursa Thermal Spa & Wellness',
+    description: 'Experience natural healing in Bursa\'s historic thermal springs with traditional Turkish bath treatments.',
+    location: {
+      city: 'Bursa',
+      country: 'Turkey',
+      coordinates: { latitude: 40.1826, longitude: 29.0666 },
+      address: 'Çekirge Thermal District, Bursa, Turkey'
+    },
+    duration: { days: 4, nights: 3 },
+    pricing: {
+      basePrice: 720,
+      currency: 'EUR',
+      includes: { flights: false, accommodation: true, meals: 'half-board', transfers: true }
+    },
+    category: 'wellness-spa',
+    experienceTypes: ['Relaxing (Wellness)', 'Close to Nature'],
+    services: [
+      { name: 'Doctor Consultation', description: 'Health assessment', included: true },
+      { name: 'Health Screening', description: 'Basic health check', included: true },
+      { name: 'Thermal Spa', description: 'Unlimited thermal bath access', included: true },
+      { name: 'Turkish Bath', description: 'Traditional hammam experience', included: true },
+      { name: 'Massage', description: 'Therapeutic massage sessions', included: true },
+      { name: 'Airport Pickup', description: 'Transfer service', included: true }
+    ],
+    accommodation: {
+      name: 'Bursa Thermal Resort',
+      type: 'spa-hotel',
+      starRating: 4,
+      amenities: ['Thermal Pools', 'Turkish Bath', 'Spa Center', 'Restaurant', 'WiFi'],
+      roomType: 'Deluxe Thermal View Room'
+    },
+    medicalFacility: {
+      name: 'Bursa Wellness Center',
+      type: 'wellness-center',
+      accreditations: ['ISO 9001', 'Turkish Health Tourism'],
+      specializations: ['Thermal Therapy', 'Stress Management'],
+      doctors: [{ name: 'Dr. Zeynep Yılmaz', specialization: 'Thermal Medicine', experience: 10, languages: ['Turkish', 'English', 'German'] }]
+    },
+    availability: { maxCapacity: 25, currentBookings: 8 },
+    rating: { average: 4.7, count: 95 },
+    isActive: true,
+    isFeatured: true,
+    tags: ['thermal', 'wellness', 'spa', 'hammam', 'traditional']
+  },
+
+  {
+    title: 'Afyon Kaplıcaları Wellness Retreat',
+    description: 'Rejuvenate in Afyon\'s mineral-rich thermal waters, known for therapeutic properties since ancient times.',
+    location: {
+      city: 'Afyonkarahisar',
+      country: 'Turkey',
+      coordinates: { latitude: 38.7569, longitude: 30.5387 },
+      address: 'Afyon Thermal Springs, Afyonkarahisar, Turkey'
+    },
+    duration: { days: 6, nights: 5 },
+    pricing: {
+      basePrice: 950,
+      currency: 'EUR',
+      includes: { flights: false, accommodation: true, meals: 'full-board', transfers: true }
+    },
+    category: 'wellness-spa',
+    experienceTypes: ['Relaxing (Wellness)', 'Close to Nature', 'Family-Friendly'],
+    services: [
+      { name: 'Doctor Consultation', description: 'Comprehensive health assessment', included: true },
+      { name: 'Health Screening', description: 'Full body check-up', included: true },
+      { name: 'Thermal Spa', description: 'Daily thermal pool access', included: true },
+      { name: 'Mud Bath', description: 'Therapeutic mud treatments', included: true },
+      { name: 'Dietitian Consultation', description: 'Personalized nutrition plan', included: true },
+      { name: 'Physiotherapy', description: 'Physical therapy sessions', included: true },
+      { name: 'Airport Pickup', description: 'Transfer service', included: true },
+      { name: 'Sightseeing Tours', description: 'Local attractions tour', included: true }
+    ],
+    accommodation: {
+      name: 'Afyon Grand Thermal Hotel',
+      type: 'spa-resort',
+      starRating: 5,
+      amenities: ['Multiple Thermal Pools', 'Mud Bath', 'Spa Center', 'Restaurants', 'Fitness Center', 'WiFi'],
+      roomType: 'Premium Suite'
+    },
+    medicalFacility: {
+      name: 'Afyon Health & Wellness Center',
+      type: 'wellness-center',
+      accreditations: ['JCI', 'ISO 9001', 'Blue Flag Thermal'],
+      specializations: ['Rheumatology', 'Dermatology', 'Physiotherapy'],
+      doctors: [
+        { name: 'Dr. Can Arslan', specialization: 'Rheumatology', experience: 18, languages: ['Turkish', 'English'] },
+        { name: 'Dr. Elif Kara', specialization: 'Dermatology', experience: 12, languages: ['Turkish', 'English', 'Russian'] }
+      ]
+    },
+    availability: { maxCapacity: 30, currentBookings: 12 },
+    rating: { average: 4.9, count: 143 },
+    isActive: true,
+    isFeatured: true,
+    tags: ['thermal', 'wellness', 'spa', 'mud-bath', 'luxury', 'family']
+  },
+
+  {
+    title: 'Bodrum Luxury Wellness & Spa',
+    description: 'Combine wellness with luxury in beautiful Bodrum, featuring modern spa facilities and Aegean views.',
+    location: {
+      city: 'Bodrum',
+      country: 'Turkey',
+      coordinates: { latitude: 37.0344, longitude: 27.4305 },
+      address: 'Bodrum Peninsula, Muğla, Turkey'
+    },
+    duration: { days: 5, nights: 4 },
+    pricing: {
+      basePrice: 1150,
+      currency: 'EUR',
+      includes: { flights: false, accommodation: true, meals: 'full-board', transfers: true }
+    },
+    category: 'wellness-spa',
+    experienceTypes: ['Relaxing (Wellness)', 'Family-Friendly'],
+    services: [
+      { name: 'Doctor Consultation', description: 'Wellness assessment', included: true },
+      { name: 'Health Screening', description: 'Advanced health screening', included: true },
+      { name: 'Spa Treatments', description: 'Daily luxury spa treatments', included: true },
+      { name: 'Yoga & Meditation', description: 'Morning yoga sessions', included: true },
+      { name: 'Massage', description: 'Swedish and Thai massage', included: true },
+      { name: 'Dietitian Consultation', description: 'Detox nutrition plan', included: true },
+      { name: 'Beauty Treatments', description: 'Facial and body care', included: true },
+      { name: 'Airport Pickup', description: 'VIP transfer service', included: true }
+    ],
+    accommodation: {
+      name: 'Bodrum Luxury Spa Resort',
+      type: 'luxury-resort',
+      starRating: 5,
+      amenities: ['Infinity Pool', 'Private Beach', 'World-Class Spa', 'Fine Dining', 'Fitness Center', 'WiFi'],
+      roomType: 'Sea View Premium Room'
+    },
+    medicalFacility: {
+      name: 'Bodrum Wellness Institute',
+      type: 'wellness-center',
+      accreditations: ['ISO 9001', 'European Spa Association'],
+      specializations: ['Anti-aging', 'Stress Management', 'Detox'],
+      doctors: [{ name: 'Dr. Leyla Öztürk', specialization: 'Wellness Medicine', experience: 15, languages: ['Turkish', 'English', 'French'] }]
+    },
+    availability: { maxCapacity: 20, currentBookings: 6 },
+    rating: { average: 4.8, count: 87 },
+    isActive: true,
+    isFeatured: true,
+    tags: ['wellness', 'spa', 'luxury', 'yoga', 'detox', 'beach']
   }
 ];
 

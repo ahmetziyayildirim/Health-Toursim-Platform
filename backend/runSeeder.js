@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
-const seedPackages = require('./src/seeders/packageSeeder');
+const { seedPackages } = require('./src/seeders/packageSeeder');
 const { seedAdmin } = require('./src/seeders/adminSeeder');
 const { seedUsers } = require('./src/seeders/userSeeder');
 const { seedBookings } = require('./src/seeders/bookingSeeder');

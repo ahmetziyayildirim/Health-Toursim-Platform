@@ -3,6 +3,7 @@ import { Heart, MapPin, Calendar, DollarSign, User, MessageCircle, Star, Plane, 
 import { packageAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminPanel from './AdminPanel.jsx';
+import AIChat from './AIChat.jsx';
 
 const HealthTourismPlatform = () => {
   const { user, isAuthenticated, login, register, logout, updatePreferences, isLoading } = useAuth();
@@ -13,10 +14,6 @@ const HealthTourismPlatform = () => {
     experiences: [],
     services: []
   });
-  const [chatMessages, setChatMessages] = useState([
-    { type: 'ai', text: 'Hello! I\'m your AI health tourism advisor. I\'m here to help you find the perfect health experience. What brings you here today?' }
-  ]);
-  const [chatInput, setChatInput] = useState('');
   const [userInfo, setUserInfo] = useState({
     name: '',
     email: '',
@@ -134,27 +131,6 @@ const HealthTourismPlatform = () => {
         ? prev.services.filter(s => s !== service)
         : [...prev.services, service]
     }));
-  };
-
-  const handleChatSubmit = () => {
-    if (!chatInput.trim()) return;
-
-    setChatMessages(prev => [...prev, { type: 'user', text: chatInput }]);
-    
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = [
-        "That sounds great! Let me help you find the perfect health tourism package. Can you tell me more about your budget range?",
-        "Based on what you've told me, I recommend exploring our wellness packages in Pamukkale or our dental care options in Istanbul. Would you like me to show you some specific options?",
-        "Perfect! I can create a personalized itinerary for you. What dates are you planning to travel?",
-        "Excellent choice! Let me prepare a customized package that includes your preferred services. This will take just a moment..."
-      ];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setChatMessages(prev => [...prev, { type: 'ai', text: randomResponse }]);
-    }, 1000);
-
-    setChatInput('');
   };
 
   // Auth handlers
@@ -699,74 +675,10 @@ const HealthTourismPlatform = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg h-96 flex flex-col">
-            {/* Chat Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white p-4 rounded-t-xl">
-              <h2 className="text-xl font-bold">AI Health Tourism Advisor</h2>
-              <p className="text-blue-100">Let me help you find the perfect health experience</p>
-            </div>
-
-            {/* Chat Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-4">
-              {chatMessages.map((message, index) => (
-                <div key={index} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    message.type === 'user' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {message.text}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Chat Input */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleChatSubmit()}
-                  placeholder="Type your message..."
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <button
-                  onClick={handleChatSubmit}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Send
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mt-6 grid md:grid-cols-3 gap-4">
-            <button
-              onClick={() => setCurrentPage('filters')}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
-            >
-              <Plane className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-              <div className="font-semibold">Plan a Trip</div>
-            </button>
-            <button
-              onClick={() => setCurrentPage('suggestion')}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
-            >
-              <Heart className="h-8 w-8 mx-auto mb-2 text-green-600" />
-              <div className="font-semibold">See Recommendations</div>
-            </button>
-            <button
-              onClick={() => setCurrentPage('contact')}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow text-center"
-            >
-              <Phone className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-              <div className="font-semibold">Get Support</div>
-            </button>
+      <div className="container mx-auto px-6 py-8 h-[calc(100vh-120px)]">
+        <div className="max-w-5xl mx-auto h-full">
+          <div className="bg-white rounded-xl shadow-lg h-full flex flex-col overflow-hidden">
+            <AIChat onClose={() => setCurrentPage('home')} />
           </div>
         </div>
       </div>

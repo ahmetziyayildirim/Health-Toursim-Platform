@@ -125,7 +125,13 @@ const packageSchema = new mongoose.Schema({
         'Massage Therapy',
         'Accommodation',
         'Meals',
-        'Translation Services'
+        'Translation Services',
+        'Turkish Bath',
+        'Massage',
+        'Mud Bath',
+        'Yoga & Meditation',
+        'Spa Treatments',
+        'Beauty Treatments'
       ]
     },
     description: String,
@@ -142,7 +148,7 @@ const packageSchema = new mongoose.Schema({
     name: String,
     type: {
       type: String,
-      enum: ['hotel', 'resort', 'clinic', 'spa-hotel', 'hospital'],
+      enum: ['hotel', 'resort', 'clinic', 'spa-hotel', 'spa-resort', 'luxury-resort', 'hospital'],
       default: 'hotel'
     },
     starRating: {

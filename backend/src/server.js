@@ -157,6 +157,7 @@ app.use('/api/packages', require('./routes/packages'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/chat', require('./routes/chat'));
 
 // Root route
 app.get('/', (req, res) => {
@@ -424,3 +425,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+

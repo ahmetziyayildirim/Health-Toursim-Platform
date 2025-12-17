@@ -1,5 +1,6 @@
 // API configuration and base setup
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Force local development
+const API_BASE_URL = 'http://localhost:5001/api';
 
 class ApiService {
   constructor() {

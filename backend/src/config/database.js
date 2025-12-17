@@ -10,9 +10,14 @@ const connectDB = async () => {
     // For development, use MongoDB Memory Server if no MongoDB URI provided
     if (process.env.NODE_ENV === 'development' && (!mongoUri || mongoUri === 'memory')) {
       console.log('🚀 Starting MongoDB Memory Server for development...');
-      mongod = await MongoMemoryServer.create();
-      mongoUri = mongod.getUri();
-      console.log('✅ MongoDB Memory Server started');
+      try {
+        mongod = await MongoMemoryServer.create();
+        mongoUri = mongod.getUri();
+        console.log('✅ MongoDB Memory Server started at:', mongoUri);
+      } catch (memServerError) {
+        console.error('❌ MongoDB Memory Server failed to start:', memServerError.message);
+        throw memServerError;
+      }
     }
 
     // Validate MongoDB URI
@@ -26,7 +31,7 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: process.env.NODE_ENV === 'production' ? 10000 : 5000,
       socketTimeoutMS: 45000,
       maxPoolSize: 10, // Maintain up to 10 socket connections
-      bufferCommands: false, // Disable mongoose buffering
+      bufferCommands: true, // Enable mongoose buffering for better error handling
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
