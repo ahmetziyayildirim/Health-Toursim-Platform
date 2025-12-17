@@ -15,26 +15,34 @@ app.use(helmet({
 }));
 
 // CORS configuration for both development and production
-const allowedOrigins = [
-  // Development origins
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'http://localhost:3003',
-  'http://localhost:3004',
-  'http://localhost:3005',
-  'http://localhost:3006',
-  'http://localhost:5001',
-  'http://localhost:5002',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:5175',
-  // Production origins
-  'https://health-tourism-frontend.onrender.com',
-  'https://health-toursim-platform.onrender.com',
-  process.env.FRONTEND_URL,
-  process.env.ADMIN_URL
-].filter(Boolean); // Remove undefined values
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      // Production origins only
+      'https://health-tourism-frontend.onrender.com',
+      'https://health-toursim-platform.onrender.com',
+      process.env.FRONTEND_URL,
+      process.env.ADMIN_URL
+    ].filter(Boolean)
+  : [
+      // Development origins
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:3003',
+      'http://localhost:3004',
+      'http://localhost:3005',
+      'http://localhost:3006',
+      'http://localhost:5001',
+      'http://localhost:5002',
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+      // Production origins
+      'https://health-tourism-frontend.onrender.com',
+      'https://health-toursim-platform.onrender.com',
+      process.env.FRONTEND_URL,
+      process.env.ADMIN_URL
+    ].filter(Boolean); // Remove undefined values
 
 app.use(cors({
   origin: function (origin, callback) {
