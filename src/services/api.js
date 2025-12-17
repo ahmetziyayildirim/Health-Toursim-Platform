@@ -1,6 +1,9 @@
 // API configuration and base setup
-// Force local development
-const API_BASE_URL = 'http://localhost:5001/api';
+// Automatically detect environment
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:5001/api'
+    : 'https://health-tourism-frontend.onrender.com/api');
 
 class ApiService {
   constructor() {
