@@ -61,9 +61,14 @@ exports.register = async (req, res, next) => {
 
     const { firstName, lastName, email, password, phone, country } = req.body;
 
+    // Normalize email (DB stores lowercased emails)
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : email;
+    console.log(`📝 Register attempt for: ${normalizedEmail}`);
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
+      console.log(`⚠️ Registration blocked - user already exists: ${normalizedEmail}`);
       return res.status(400).json({
         success: false,
         message: 'User already exists with this email'
@@ -74,7 +79,7 @@ exports.register = async (req, res, next) => {
     const user = await User.create({
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       password,
       phone,
       country,
@@ -130,10 +135,14 @@ exports.login = async (req, res, next) => {
 
     const { email, password } = req.body;
 
+    // Normalize email (DB stores lowercased emails)
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : email;
+
     // Check for user (include password field)
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user) {
+      console.log(`❌ Login failed - user not found: ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -144,6 +153,7 @@ exports.login = async (req, res, next) => {
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
+      console.log(`❌ Login failed - password mismatch for: ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
