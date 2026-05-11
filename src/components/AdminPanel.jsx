@@ -20,6 +20,150 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
+// ── DemographicsCards ──────────────────────────────────────────────────────
+// Renders 5 user-breakdown cards: age, gender, top countries, top treatments,
+// average budget. Used in the admin dashboard for at-a-glance demographic stats.
+const cardBase = {
+  backgroundColor: 'white',
+  borderRadius: '12px',
+  boxShadow: '0 10px 15px rgba(0,0,0,0.1)',
+  padding: '20px'
+};
+const cardTitle = { fontSize: '13px', textTransform: 'uppercase', color: '#6b7280', letterSpacing: '0.04em', margin: '0 0 14px', fontWeight: 600 };
+
+const BarRow = ({ label, count, max, total, color = '#3b82f6' }) => {
+  const widthPct = max ? (count / max) * 100 : 0;
+  const sharePct = total ? ((count / total) * 100).toFixed(1) : '0.0';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+      <div style={{ flex: '0 0 90px', fontSize: '13px', color: '#374151' }}>{label}</div>
+      <div style={{ flex: 1, height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ width: `${widthPct}%`, height: '100%', background: color, borderRadius: '4px' }} />
+      </div>
+      <div style={{ flex: '0 0 60px', fontSize: '12px', color: '#6b7280', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+        {count} · {sharePct}%
+      </div>
+    </div>
+  );
+};
+
+const GenderDonut = ({ data, total }) => {
+  const colors = { female: '#ec4899', male: '#3b82f6', other: '#a78bfa', 'prefer-not-to-say': '#9ca3af' };
+  let acc = 0;
+  const segments = data.map(({ label, count }) => {
+    const start = (acc / total) * 360;
+    acc += count;
+    const end = (acc / total) * 360;
+    return `${colors[label] || '#94a3b8'} ${start}deg ${end}deg`;
+  }).join(', ');
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{
+        width: '120px', height: '120px', borderRadius: '50%',
+        background: `conic-gradient(${segments})`,
+        position: 'relative'
+      }}>
+        <div style={{
+          position: 'absolute', inset: '22px', borderRadius: '50%', background: 'white',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '14px', fontWeight: 600, color: '#374151'
+        }}>
+          {total}
+        </div>
+      </div>
+      <div style={{ flex: 1 }}>
+        {data.map(({ label, count }) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: '4px' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: colors[label] || '#94a3b8', display: 'inline-block' }} />
+            <span style={{ flex: 1, textTransform: 'capitalize', color: '#374151' }}>{label.replace(/-/g, ' ')}</span>
+            <span style={{ color: '#6b7280', fontVariantNumeric: 'tabular-nums' }}>{count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TREATMENT_LABELS = {
+  'hair-transplant': 'Saç Ekimi',
+  'dental-care': 'Diş Bakımı',
+  'aesthetic-surgery': 'Estetik Cerrahi',
+  'wellness-spa': 'Wellness / Spa',
+  'health-checkup': 'Check-up',
+  'eye-surgery': 'Göz Ameliyatı',
+  'weight-loss': 'Kilo Verme',
+  'medical-treatment': 'Tıbbi Tedavi',
+  'rehabilitation': 'Rehabilitasyon',
+  'fertility-treatment': 'İnfertilite'
+};
+
+const DemographicsCards = ({ data, totalUsers }) => {
+  const ageMax = Math.max(...data.ageBands.map(b => b.count), 1);
+  const countryMax = Math.max(...data.topCountries.map(c => c.count), 1);
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '20px',
+      marginBottom: '32px'
+    }}>
+      {/* Yaş Dağılımı */}
+      <div style={cardBase}>
+        <p style={cardTitle}>Yaş Dağılımı</p>
+        {data.ageBands.map(b => (
+          <BarRow key={b.label} label={b.label} count={b.count} max={ageMax} total={totalUsers} color="#3b82f6" />
+        ))}
+      </div>
+
+      {/* Cinsiyet */}
+      <div style={cardBase}>
+        <p style={cardTitle}>Cinsiyet</p>
+        <GenderDonut data={data.gender} total={totalUsers} />
+      </div>
+
+      {/* Top 5 Ülke */}
+      <div style={cardBase}>
+        <p style={cardTitle}>Top 5 Ülke</p>
+        {data.topCountries.map(c => (
+          <BarRow key={c.label} label={c.label} count={c.count} max={countryMax} total={totalUsers} color="#10b981" />
+        ))}
+      </div>
+
+      {/* Top 3 İstenen Tedavi */}
+      <div style={cardBase}>
+        <p style={cardTitle}>En Çok İstenen Tedaviler</p>
+        {data.topTreatments.map((t, i) => (
+          <div key={t.label} style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '10px 0', borderBottom: i < data.topTreatments.length - 1 ? '1px solid #f1f5f9' : 'none'
+          }}>
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '50%',
+              background: ['#f59e0b', '#fbbf24', '#fcd34d'][i] || '#e5e7eb',
+              color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '13px', fontWeight: 700
+            }}>{i + 1}</div>
+            <div style={{ flex: 1, fontSize: '14px', color: '#374151' }}>{TREATMENT_LABELS[t.label] || t.label}</div>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#1f2937' }}>{t.count}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Ortalama Bütçe */}
+      <div style={cardBase}>
+        <p style={cardTitle}>Ortalama Bütçe</p>
+        <p style={{ fontSize: '36px', fontWeight: 700, color: '#8b5cf6', margin: '4px 0' }}>
+          €{(data.budget.avg || 0).toLocaleString('tr-TR')}
+        </p>
+        <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0' }}>
+          Aralık: €{(data.budget.min || 0).toLocaleString('tr-TR')} – €{(data.budget.max || 0).toLocaleString('tr-TR')}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const AdminPanel = () => {
   const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard');
@@ -99,6 +243,7 @@ const AdminPanel = () => {
   });
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
+  const [demographics, setDemographics] = useState(null);
 
   const loadPackages = React.useCallback(async () => {
     try {
@@ -179,22 +324,28 @@ const AdminPanel = () => {
       
       const adminService = (await import('../services/adminService')).default;
       
-      // Load all data in parallel
-      const [usersData, packagesData, bookingsData] = await Promise.all([
+      // Load all data in parallel — dashboardStats also provides demographics aggregation
+      const [usersData, packagesData, bookingsData, dashboardData] = await Promise.all([
         adminService.getUsers(),
         adminService.getPackages(),
-        adminService.getBookings()
+        adminService.getBookings(),
+        adminService.getDashboardStats().catch(() => null)
       ]);
 
-      console.log('Dashboard data loaded:', { usersData, packagesData, bookingsData });
+      console.log('Dashboard data loaded:', { usersData, packagesData, bookingsData, dashboardData });
 
-      // Update stats
+      if (dashboardData?.success && dashboardData.data?.demographics) {
+        setDemographics(dashboardData.data.demographics);
+      }
+
+      // Update stats — use the backend's `total` (full count), not `data.length`
+      // which only counts the current paginated page.
       if (usersData.success && packagesData.success && bookingsData.success) {
         setDashboardStats({
-          totalUsers: usersData.data.length,
-          totalPackages: packagesData.data.length, // This will now include inactive packages
-          totalBookings: bookingsData.data.length,
-          activePackages: packagesData.data.filter(pkg => pkg.isActive !== false).length // Count active packages
+          totalUsers: usersData.total ?? usersData.data.length,
+          totalPackages: packagesData.total ?? packagesData.data.length,
+          totalBookings: bookingsData.total ?? bookingsData.data.length,
+          activePackages: packagesData.data.filter(pkg => pkg.isActive !== false).length
         });
 
         // Set recent users (last 3)
@@ -644,6 +795,11 @@ const AdminPanel = () => {
           </div>
         ))}
       </div>
+
+      {/* Demographics — user breakdown for thesis / reporting */}
+      {demographics && (
+        <DemographicsCards data={demographics} totalUsers={dashboardStats.totalUsers} />
+      )}
 
       {/* Recent Activity */}
       <div style={{

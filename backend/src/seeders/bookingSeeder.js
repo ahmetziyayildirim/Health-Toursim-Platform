@@ -190,7 +190,81 @@ const seedBookings = async () => {
       console.log(`✅ Created booking 5: ${booking5.bookingNumber} for ${users[4].firstName} ${users[4].lastName}`);
     }
 
-    console.log(`✅ Seeded ${bookings.length} bookings successfully`);
+    // ─── Random bulk bookings ─────────────────────────────────────────────
+    // Sample ~35% of users (skip the 6 demo users at index 0–5 to avoid dup)
+    const { faker } = require('@faker-js/faker');
+    faker.seed(99);
+
+    const candidateUsers = users.slice(6); // skip demo users
+    const targetBookings = 180;
+    const statusDist = [
+      { value: 'completed',          weight: 40 },
+      { value: 'confirmed',          weight: 25 },
+      { value: 'payment-completed',  weight: 10 },
+      { value: 'pending-confirmation', weight: 10 },
+      { value: 'in-progress',        weight:  5 },
+      { value: 'documents-required', weight:  5 },
+      { value: 'cancelled',          weight:  5 }
+    ];
+    const pickStatus = () => {
+      const total = statusDist.reduce((s, p) => s + p.weight, 0);
+      let r = Math.random() * total;
+      for (const p of statusDist) if ((r -= p.weight) < 0) return p.value;
+      return 'confirmed';
+    };
+
+    const sampled = faker.helpers.arrayElements(candidateUsers, Math.min(targetBookings, candidateUsers.length));
+    let bulkSuccess = 0;
+    let bulkSeq = 100; // booking number suffix starts at 100
+
+    for (const user of sampled) {
+      const pkg = faker.helpers.arrayElement(packages);
+      const start = faker.date.between({ from: '2025-01-01', to: '2026-09-30' });
+      const end = new Date(start);
+      end.setDate(end.getDate() + faker.number.int({ min: 3, max: 14 }));
+
+      const additional = faker.number.int({ min: 0, max: 300 });
+      const discount = faker.number.int({ min: 0, max: 150 });
+      const base = pkg.pricing.basePrice;
+      const taxes = Math.round(base * 0.1);
+
+      const booking = new Booking({
+        user: user._id,
+        package: pkg._id,
+        bookingNumber: `HT202501${String(bulkSeq++).padStart(4, '0')}`,
+        personalInfo: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone || '+90-000-000-0000',
+          country: user.country || 'Unknown',
+          dateOfBirth: user.dateOfBirth || new Date('1980-01-01')
+        },
+        travelDates: { startDate: start, endDate: end },
+        travelers: {
+          adults: user.preferences?.companions?.count || 1,
+          children: 0,
+          infants: 0
+        },
+        pricing: {
+          basePrice: base,
+          additionalServices: additional,
+          discounts: discount,
+          taxes,
+          totalPrice: base + additional + taxes - discount
+        },
+        status: pickStatus()
+      });
+
+      try {
+        await booking.save();
+        bulkSuccess++;
+      } catch (e) {
+        // skip on validation failures (e.g., dup bookingNumber)
+      }
+    }
+
+    console.log(`✅ Seeded ${bookings.length} demo bookings + ${bulkSuccess} random bookings (${bookings.length + bulkSuccess} total)`);
     return bookings;
   } catch (error) {
     console.error('❌ Error seeding bookings:', error);

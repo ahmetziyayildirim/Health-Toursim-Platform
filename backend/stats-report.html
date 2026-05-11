@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Tourism — Kullanıcı İstatistikleri</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --ink: #14202b;
+    --muted: #5b6b7a;
+    --line: #e6ebf1;
+    --primary: #0d6efd;
+    --accent: #20c997;
+    --bar-from: #4f8cff;
+    --bar-to: #7ad3ff;
+    --shadow: 0 1px 3px rgba(20,32,43,.06), 0 6px 24px rgba(20,32,43,.05);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  header.page {
+    background: linear-gradient(135deg, #0d6efd 0%, #20c997 100%);
+    color: white; padding: 32px 24px; box-shadow: var(--shadow);
+  }
+  header.page h1 { margin: 0 0 4px; font-size: 24px; font-weight: 600; }
+  header.page .meta { opacity: .9; font-size: 13px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .kpi-grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--card); border-radius: 12px; padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .kpi .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .kpi .value { font-size: 26px; font-weight: 700; margin-top: 4px; color: var(--primary); }
+  .kpi .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .grid {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  }
+  .card {
+    background: var(--card); border-radius: 12px; padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 { font-size: 15px; margin: 0 0 12px; color: var(--ink); font-weight: 600; }
+  table.dist { width: 100%; border-collapse: collapse; }
+  table.dist th { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); }
+  table.dist th:nth-child(2), table.dist th:nth-child(3) { text-align: right; }
+  table.dist td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.dist tr:last-child td { border-bottom: none; }
+  td.label { font-weight: 500; }
+  td.count, td.pct { text-align: right; font-variant-numeric: tabular-nums; }
+  td.pct { color: var(--muted); font-size: 12px; min-width: 56px; }
+  td.bar-cell { width: 40%; padding-left: 12px; }
+  .bar {
+    height: 10px; border-radius: 5px;
+    background: linear-gradient(90deg, var(--bar-from), var(--bar-to));
+    min-width: 2px;
+  }
+  .card.wide { grid-column: 1 / -1; }
+  .more { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    td.bar-cell { width: 30%; }
+  }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>🌍 Health Tourism — Kullanıcı İstatistikleri</h1>
+  <div class="meta">Generated: 2026-05-11 10:03:45 UTC · MongoDB: <code>healthtourism</code></div>
+</header>
+<main>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="label">Toplam Kullanıcı</div><div class="value">800</div><div class="sub">6 demo + 794 random</div></div>
+    <div class="kpi"><div class="label">Aktif Booking</div><div class="value">185</div><div class="sub">23.1% kullanıcı booking aldı</div></div>
+    <div class="kpi"><div class="label">Ortalama Yaş</div><div class="value">49.4</div><div class="sub">aralık 26–72</div></div>
+    <div class="kpi"><div class="label">Ortalama Bütçe</div><div class="value">€4.137</div><div class="sub">aralık €800–€19.600</div></div>
+    <div class="kpi"><div class="label">Ülke Sayısı</div><div class="value">19</div><div class="sub">143 farklı şehir</div></div>
+    <div class="kpi"><div class="label">Ort. Refakatçi</div><div class="value">1.94</div><div class="sub">kişi / seyahat</div></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+    <h2>Yaş Bandı</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">25-34</td>
+        <td class="count">29</td>
+        <td class="pct">3.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">35-44</td>
+        <td class="count">188</td>
+        <td class="pct">23.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:648.3%"></div></td>
+      </tr><tr>
+        <td class="label">45-54</td>
+        <td class="count">375</td>
+        <td class="pct">46.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:1293.1%"></div></td>
+      </tr><tr>
+        <td class="label">55-64</td>
+        <td class="count">177</td>
+        <td class="pct">22.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:610.3%"></div></td>
+      </tr><tr>
+        <td class="label">65-75</td>
+        <td class="count">31</td>
+        <td class="pct">3.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:106.9%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Cinsiyet</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">female</td>
+        <td class="count">405</td>
+        <td class="pct">50.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">male</td>
+        <td class="count">379</td>
+        <td class="pct">47.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:93.6%"></div></td>
+      </tr><tr>
+        <td class="label">prefer-not-to-say</td>
+        <td class="count">10</td>
+        <td class="pct">1.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:2.5%"></div></td>
+      </tr><tr>
+        <td class="label">other</td>
+        <td class="count">6</td>
+        <td class="pct">0.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:1.5%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Medeni Durum</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">married</td>
+        <td class="count">411</td>
+        <td class="pct">51.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">single</td>
+        <td class="count">284</td>
+        <td class="pct">35.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:69.1%"></div></td>
+      </tr><tr>
+        <td class="label">divorced</td>
+        <td class="count">84</td>
+        <td class="pct">10.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:20.4%"></div></td>
+      </tr><tr>
+        <td class="label">widowed</td>
+        <td class="count">21</td>
+        <td class="pct">2.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:5.1%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Bütçe (€)</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">€&lt;1000</td>
+        <td class="count">59</td>
+        <td class="pct">7.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">€1000-2499</td>
+        <td class="count">358</td>
+        <td class="pct">44.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:606.8%"></div></td>
+      </tr><tr>
+        <td class="label">€2500-4999</td>
+        <td class="count">179</td>
+        <td class="pct">22.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:303.4%"></div></td>
+      </tr><tr>
+        <td class="label">€5000-9999</td>
+        <td class="count">133</td>
+        <td class="pct">16.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:225.4%"></div></td>
+      </tr><tr>
+        <td class="label">€10000-19999</td>
+        <td class="count">71</td>
+        <td class="pct">8.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:120.3%"></div></td>
+      </tr><tr>
+        <td class="label">€20000+</td>
+        <td class="count">0</td>
+        <td class="pct">0.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:0.0%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Uyruk (Top 10)</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">British</td>
+        <td class="count">130</td>
+        <td class="pct">16.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">German</td>
+        <td class="count">130</td>
+        <td class="pct">16.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">American</td>
+        <td class="count">98</td>
+        <td class="pct">12.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:75.4%"></div></td>
+      </tr><tr>
+        <td class="label">Dutch</td>
+        <td class="count">70</td>
+        <td class="pct">8.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:53.8%"></div></td>
+      </tr><tr>
+        <td class="label">French</td>
+        <td class="count">58</td>
+        <td class="pct">7.2%</td>
+        <td class="bar-cell"><div class="bar" style="width:44.6%"></div></td>
+      </tr><tr>
+        <td class="label">Russian</td>
+        <td class="count">38</td>
+        <td class="pct">4.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:29.2%"></div></td>
+      </tr><tr>
+        <td class="label">Azerbaijani</td>
+        <td class="count">34</td>
+        <td class="pct">4.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:26.2%"></div></td>
+      </tr><tr>
+        <td class="label">Saudi</td>
+        <td class="count">30</td>
+        <td class="pct">3.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:23.1%"></div></td>
+      </tr><tr>
+        <td class="label">Emirati</td>
+        <td class="count">29</td>
+        <td class="pct">3.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:22.3%"></div></td>
+      </tr><tr>
+        <td class="label">Belgian</td>
+        <td class="count">25</td>
+        <td class="pct">3.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:19.2%"></div></td>
+      </tr></tbody>
+    </table><p class="more">…9 more</p>
+  </section>
+    <section class="card">
+    <h2>Ülke / Konum (Top 10)</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">United Kingdom</td>
+        <td class="count">130</td>
+        <td class="pct">16.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">Germany</td>
+        <td class="count">130</td>
+        <td class="pct">16.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">United States</td>
+        <td class="count">98</td>
+        <td class="pct">12.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:75.4%"></div></td>
+      </tr><tr>
+        <td class="label">Netherlands</td>
+        <td class="count">70</td>
+        <td class="pct">8.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:53.8%"></div></td>
+      </tr><tr>
+        <td class="label">France</td>
+        <td class="count">58</td>
+        <td class="pct">7.2%</td>
+        <td class="bar-cell"><div class="bar" style="width:44.6%"></div></td>
+      </tr><tr>
+        <td class="label">Russia</td>
+        <td class="count">38</td>
+        <td class="pct">4.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:29.2%"></div></td>
+      </tr><tr>
+        <td class="label">Azerbaijan</td>
+        <td class="count">34</td>
+        <td class="pct">4.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:26.2%"></div></td>
+      </tr><tr>
+        <td class="label">Saudi Arabia</td>
+        <td class="count">30</td>
+        <td class="pct">3.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:23.1%"></div></td>
+      </tr><tr>
+        <td class="label">UAE</td>
+        <td class="count">29</td>
+        <td class="pct">3.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:22.3%"></div></td>
+      </tr><tr>
+        <td class="label">Belgium</td>
+        <td class="count">25</td>
+        <td class="pct">3.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:19.2%"></div></td>
+      </tr></tbody>
+    </table><p class="more">…9 more</p>
+  </section>
+    <section class="card">
+    <h2>Şehir (Top 15)</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">Bristol</td>
+        <td class="count">20</td>
+        <td class="pct">2.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">Leipzig</td>
+        <td class="count">17</td>
+        <td class="pct">2.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:85.0%"></div></td>
+      </tr><tr>
+        <td class="label">Düsseldorf</td>
+        <td class="count">16</td>
+        <td class="pct">2.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:80.0%"></div></td>
+      </tr><tr>
+        <td class="label">Boston</td>
+        <td class="count">16</td>
+        <td class="pct">2.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:80.0%"></div></td>
+      </tr><tr>
+        <td class="label">Berlin</td>
+        <td class="count">15</td>
+        <td class="pct">1.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:75.0%"></div></td>
+      </tr><tr>
+        <td class="label">Tilburg</td>
+        <td class="count">15</td>
+        <td class="pct">1.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:75.0%"></div></td>
+      </tr><tr>
+        <td class="label">Edinburgh</td>
+        <td class="count">15</td>
+        <td class="pct">1.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:75.0%"></div></td>
+      </tr><tr>
+        <td class="label">London</td>
+        <td class="count">14</td>
+        <td class="pct">1.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:70.0%"></div></td>
+      </tr><tr>
+        <td class="label">Liverpool</td>
+        <td class="count">14</td>
+        <td class="pct">1.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:70.0%"></div></td>
+      </tr><tr>
+        <td class="label">Newcastle</td>
+        <td class="count">14</td>
+        <td class="pct">1.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:70.0%"></div></td>
+      </tr><tr>
+        <td class="label">Rotterdam</td>
+        <td class="count">13</td>
+        <td class="pct">1.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:65.0%"></div></td>
+      </tr><tr>
+        <td class="label">Los Angeles</td>
+        <td class="count">12</td>
+        <td class="pct">1.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:60.0%"></div></td>
+      </tr><tr>
+        <td class="label">Hamburg</td>
+        <td class="count">12</td>
+        <td class="pct">1.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:60.0%"></div></td>
+      </tr><tr>
+        <td class="label">Glasgow</td>
+        <td class="count">12</td>
+        <td class="pct">1.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:60.0%"></div></td>
+      </tr><tr>
+        <td class="label">Manchester</td>
+        <td class="count">12</td>
+        <td class="pct">1.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:60.0%"></div></td>
+      </tr></tbody>
+    </table><p class="more">…128 more</p>
+  </section>
+    <section class="card">
+    <h2>Daha Önce Aldığı Tedavi</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">dental-care</td>
+        <td class="count">164</td>
+        <td class="pct">20.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">hair-transplant</td>
+        <td class="count">159</td>
+        <td class="pct">19.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:97.0%"></div></td>
+      </tr><tr>
+        <td class="label">aesthetic-surgery</td>
+        <td class="count">102</td>
+        <td class="pct">12.8%</td>
+        <td class="bar-cell"><div class="bar" style="width:62.2%"></div></td>
+      </tr><tr>
+        <td class="label">wellness-spa</td>
+        <td class="count">100</td>
+        <td class="pct">12.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:61.0%"></div></td>
+      </tr><tr>
+        <td class="label">health-checkup</td>
+        <td class="count">66</td>
+        <td class="pct">8.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:40.2%"></div></td>
+      </tr><tr>
+        <td class="label">eye-surgery</td>
+        <td class="count">48</td>
+        <td class="pct">6.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:29.3%"></div></td>
+      </tr><tr>
+        <td class="label">weight-loss</td>
+        <td class="count">34</td>
+        <td class="pct">4.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:20.7%"></div></td>
+      </tr><tr>
+        <td class="label">medical-treatment</td>
+        <td class="count">27</td>
+        <td class="pct">3.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:16.5%"></div></td>
+      </tr><tr>
+        <td class="label">rehabilitation</td>
+        <td class="count">19</td>
+        <td class="pct">2.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:11.6%"></div></td>
+      </tr><tr>
+        <td class="label">fertility-treatment</td>
+        <td class="count">15</td>
+        <td class="pct">1.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:9.1%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Almak İstediği Tedavi</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">hair-transplant</td>
+        <td class="count">275</td>
+        <td class="pct">34.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">dental-care</td>
+        <td class="count">261</td>
+        <td class="pct">32.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:94.9%"></div></td>
+      </tr><tr>
+        <td class="label">aesthetic-surgery</td>
+        <td class="count">172</td>
+        <td class="pct">21.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:62.5%"></div></td>
+      </tr><tr>
+        <td class="label">wellness-spa</td>
+        <td class="count">131</td>
+        <td class="pct">16.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:47.6%"></div></td>
+      </tr><tr>
+        <td class="label">health-checkup</td>
+        <td class="count">93</td>
+        <td class="pct">11.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:33.8%"></div></td>
+      </tr><tr>
+        <td class="label">weight-loss</td>
+        <td class="count">74</td>
+        <td class="pct">9.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:26.9%"></div></td>
+      </tr><tr>
+        <td class="label">eye-surgery</td>
+        <td class="count">73</td>
+        <td class="pct">9.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:26.5%"></div></td>
+      </tr><tr>
+        <td class="label">medical-treatment</td>
+        <td class="count">47</td>
+        <td class="pct">5.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:17.1%"></div></td>
+      </tr><tr>
+        <td class="label">rehabilitation</td>
+        <td class="count">23</td>
+        <td class="pct">2.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:8.4%"></div></td>
+      </tr><tr>
+        <td class="label">fertility-treatment</td>
+        <td class="count">19</td>
+        <td class="pct">2.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:6.9%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Refakatçi Tipi</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">solo</td>
+        <td class="count">320</td>
+        <td class="pct">40.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">couple</td>
+        <td class="count">284</td>
+        <td class="pct">35.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:88.8%"></div></td>
+      </tr><tr>
+        <td class="label">family</td>
+        <td class="count">159</td>
+        <td class="pct">19.9%</td>
+        <td class="bar-cell"><div class="bar" style="width:49.7%"></div></td>
+      </tr><tr>
+        <td class="label">friends</td>
+        <td class="count">37</td>
+        <td class="pct">4.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:11.6%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Tatil İlgisi</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">Nature</td>
+        <td class="count">266</td>
+        <td class="pct">33.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">Museum</td>
+        <td class="count">261</td>
+        <td class="pct">32.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:98.1%"></div></td>
+      </tr><tr>
+        <td class="label">Shopping</td>
+        <td class="count">261</td>
+        <td class="pct">32.6%</td>
+        <td class="bar-cell"><div class="bar" style="width:98.1%"></div></td>
+      </tr><tr>
+        <td class="label">Culinary</td>
+        <td class="count">258</td>
+        <td class="pct">32.3%</td>
+        <td class="bar-cell"><div class="bar" style="width:97.0%"></div></td>
+      </tr><tr>
+        <td class="label">Winter</td>
+        <td class="count">249</td>
+        <td class="pct">31.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:93.6%"></div></td>
+      </tr><tr>
+        <td class="label">Beach</td>
+        <td class="count">243</td>
+        <td class="pct">30.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:91.4%"></div></td>
+      </tr><tr>
+        <td class="label">Adventure</td>
+        <td class="count">225</td>
+        <td class="pct">28.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:84.6%"></div></td>
+      </tr><tr>
+        <td class="label">History</td>
+        <td class="count">224</td>
+        <td class="pct">28.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:84.2%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+    <section class="card">
+    <h2>Tarih Tercihi</h2>
+    <table class="dist">
+      <thead><tr><th>Item</th><th>Count</th><th>%</th><th>Distribution</th></tr></thead>
+      <tbody><tr>
+        <td class="label">next-3-months</td>
+        <td class="count">264</td>
+        <td class="pct">33.0%</td>
+        <td class="bar-cell"><div class="bar" style="width:100.0%"></div></td>
+      </tr><tr>
+        <td class="label">next-6-months</td>
+        <td class="count">257</td>
+        <td class="pct">32.1%</td>
+        <td class="bar-cell"><div class="bar" style="width:97.3%"></div></td>
+      </tr><tr>
+        <td class="label">flexible</td>
+        <td class="count">180</td>
+        <td class="pct">22.5%</td>
+        <td class="bar-cell"><div class="bar" style="width:68.2%"></div></td>
+      </tr><tr>
+        <td class="label">next-month</td>
+        <td class="count">99</td>
+        <td class="pct">12.4%</td>
+        <td class="bar-cell"><div class="bar" style="width:37.5%"></div></td>
+      </tr></tbody>
+    </table>
+  </section>
+  </div>
+</main>
+<footer>
+  Health Tourism Platform · 800 kullanıcı veri seti · <code>node printUserStats.js</code> ile yeniden üretilebilir.
+</footer>
+</body>
+</html>

@@ -42,6 +42,24 @@ const userSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'Country cannot be more than 100 characters']
   },
+  city: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'City cannot be more than 100 characters']
+  },
+  nationality: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Nationality cannot be more than 100 characters']
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other', 'prefer-not-to-say']
+  },
+  maritalStatus: {
+    type: String,
+    enum: ['single', 'married', 'divorced', 'widowed']
+  },
   dateOfBirth: {
     type: Date
   },
@@ -69,7 +87,7 @@ const userSchema = new mongoose.Schema({
       type: String,
       enum: [
         'Doctor Consultation',
-        'Health Screening', 
+        'Health Screening',
         'Aesthetic Treatments',
         'Psychological Counseling',
         'Thermal Spa',
@@ -77,6 +95,52 @@ const userSchema = new mongoose.Schema({
         'Sightseeing Tours',
         'Airport Pickup'
       ]
+    }],
+    previousTreatments: [{
+      type: String,
+      enum: [
+        'wellness-spa',
+        'medical-treatment',
+        'dental-care',
+        'aesthetic-surgery',
+        'health-checkup',
+        'rehabilitation',
+        'fertility-treatment',
+        'eye-surgery',
+        'hair-transplant',
+        'weight-loss'
+      ]
+    }],
+    desiredTreatments: [{
+      type: String,
+      enum: [
+        'wellness-spa',
+        'medical-treatment',
+        'dental-care',
+        'aesthetic-surgery',
+        'health-checkup',
+        'rehabilitation',
+        'fertility-treatment',
+        'eye-surgery',
+        'hair-transplant',
+        'weight-loss'
+      ]
+    }],
+    companions: {
+      type: {
+        type: String,
+        enum: ['solo', 'couple', 'family', 'friends']
+      },
+      count: {
+        type: Number,
+        min: 1,
+        max: 10,
+        default: 1
+      }
+    },
+    travelInterests: [{
+      type: String,
+      enum: ['Beach', 'Winter', 'Museum', 'History', 'Nature', 'Culinary', 'Shopping', 'Adventure']
     }]
   },
   healthInfo: {

@@ -22,7 +22,8 @@ router.get('/dashboard', async (req, res) => {
       recentUsers,
       recentBookings,
       packagesByCategory,
-      monthlyStats
+      monthlyStats,
+      demographics
     ] = await Promise.all([
       Package.countDocuments(),
       User.countDocuments({ role: 'user' }),
@@ -33,7 +34,8 @@ router.get('/dashboard', async (req, res) => {
       Package.aggregate([
         { $group: { _id: '$category', count: { $sum: 1 } } }
       ]),
-      getMonthlyStats()
+      getMonthlyStats(),
+      getUserDemographics()
     ]);
 
     res.status(200).json({
@@ -48,7 +50,8 @@ router.get('/dashboard', async (req, res) => {
         recentUsers,
         recentBookings,
         packagesByCategory,
-        monthlyStats
+        monthlyStats,
+        demographics
       }
     });
   } catch (error) {
@@ -334,6 +337,58 @@ router.put('/bookings/:id/status', async (req, res) => {
     });
   }
 });
+
+// Aggregate user demographic breakdowns for the dashboard
+async function getUserDemographics() {
+  const match = { role: 'user' };
+  const [ageBands, gender, countries, treatments, budget] = await Promise.all([
+    User.aggregate([
+      { $match: { ...match, dateOfBirth: { $ne: null } } },
+      { $addFields: {
+        age: { $floor: { $divide: [{ $subtract: [new Date(), '$dateOfBirth'] }, 1000 * 60 * 60 * 24 * 365.25] } }
+      } },
+      { $bucket: {
+        groupBy: '$age',
+        boundaries: [0, 35, 45, 55, 65, 200],
+        default: 'other',
+        output: { count: { $sum: 1 } }
+      } }
+    ]),
+    User.aggregate([
+      { $match: match },
+      { $group: { _id: '$gender', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]),
+    User.aggregate([
+      { $match: match },
+      { $group: { _id: '$country', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]),
+    User.aggregate([
+      { $match: match },
+      { $unwind: '$preferences.desiredTreatments' },
+      { $group: { _id: '$preferences.desiredTreatments', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 3 }
+    ]),
+    User.aggregate([
+      { $match: { ...match, 'preferences.budget': { $gt: 0 } } },
+      { $group: { _id: null, avg: { $avg: '$preferences.budget' }, min: { $min: '$preferences.budget' }, max: { $max: '$preferences.budget' } } }
+    ])
+  ]);
+
+  const ageLabels = { 0: '25-34', 35: '35-44', 45: '45-54', 55: '55-64', 65: '65+' };
+  return {
+    ageBands: ageBands.map(b => ({ label: ageLabels[b._id] || String(b._id), count: b.count })),
+    gender: gender.map(g => ({ label: g._id || 'unknown', count: g.count })),
+    topCountries: countries.map(c => ({ label: c._id || 'Unknown', count: c.count })),
+    topTreatments: treatments.map(t => ({ label: t._id, count: t.count })),
+    budget: budget[0]
+      ? { avg: Math.round(budget[0].avg), min: budget[0].min, max: budget[0].max }
+      : { avg: 0, min: 0, max: 0 }
+  };
+}
 
 // Helper function to get monthly stats
 async function getMonthlyStats() {
