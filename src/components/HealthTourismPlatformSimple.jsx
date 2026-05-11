@@ -9,7 +9,7 @@ import SearchFilters from './SearchFilters';
 import AIChat from './AIChat';
 
 const HealthTourismPlatformSimple = () => {
-  const { user, login, logout, isAdmin } = useContext(AuthContext);
+  const { user, login, register, logout, isAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -330,13 +330,24 @@ const HealthTourismPlatformSimple = () => {
     }
     setAuthLoading(true);
     try {
-      // Register logic would go here - for now just show success
-      alert('Registration successful! Please login.');
+      const trimmedName = (registerForm.name || '').trim();
+      const nameParts = trimmedName.split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || firstName;
+
+      await register({
+        firstName,
+        lastName,
+        email: registerForm.email.trim().toLowerCase(),
+        password: registerForm.password
+      });
+
+      alert('Registration successful! You are now logged in.');
       setShowRegisterModal(false);
-      setShowLoginModal(true);
       setRegisterForm({ name: '', email: '', password: '', confirmPassword: '' });
     } catch (error) {
-      alert('Registration failed: ' + error.message);
+      const apiMessage = error?.response?.data?.message || error?.message || 'Unknown error';
+      alert('Registration failed: ' + apiMessage);
     } finally {
       setAuthLoading(false);
     }
