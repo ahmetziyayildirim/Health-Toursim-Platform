@@ -20,6 +20,8 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
       // Production origins only
       'https://health-tourism-frontend.onrender.com',
       'https://health-toursim-platform.onrender.com',
+      'https://healthtourkiye.com',
+      'https://www.healthtourkiye.com',
       process.env.FRONTEND_URL,
       process.env.ADMIN_URL
     ].filter(Boolean)
@@ -40,6 +42,8 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
       // Production origins
       'https://health-tourism-frontend.onrender.com',
       'https://health-toursim-platform.onrender.com',
+      'https://healthtourkiye.com',
+      'https://www.healthtourkiye.com',
       process.env.FRONTEND_URL,
       process.env.ADMIN_URL
     ].filter(Boolean); // Remove undefined values
